@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -63,8 +64,12 @@ public class VehiclesApiApplication {
      * @return created pricing endpoint
      */
     @Bean(name="pricing")
-    public WebClient webClientPricing(@Value("${pricing.endpoint}") String endpoint) {
-        return WebClient.create(endpoint);
+    public WebClient webClientPricing(@Value("${pricing.endpoint}") String endpoint,
+                                      LoadBalancerExchangeFilterFunction lbFunction) {
+        return WebClient.builder()
+                .filter(lbFunction)
+                .baseUrl(endpoint)
+                .build();
     }
 
 }
